@@ -1,0 +1,211 @@
+----------------복습--------------
+
+-- 1. 사원번호, 이름, 업무, 급여,  현재 급여에 15% 증가된 급여를(New Salary),  증가액(Increase)를 출력
+SELECT      EMPNO, ENAME, JOB, SAL, SAL*1.15 AS NEW_SALARY, SAL*1.15-SAL AS INCREASE
+FROM        EMP;
+--WHERE   
+?
+?-- 2. 이름, 입사일, 입사일로부터 6개월 후에 돌아오는 월요일을 출력
+-- 별칭으로 DATE 사용 불가능
+SELECT      ENAME, HIREDATE, ADD_MONTHS(HIREDATE, 6) AS MY_DATE, NEXT_DAY(ADD_MONTHS(HIREDATE,6),2) AS MY_DATE
+FROM        EMP;
+--WHERE   
+
+?-- 3.이름, 입사일, 입사일로부터 현재까지의 년수, 급여, 입사일로부터 현재까지의 급여의 총계를 출력
+SELECT      ENAME, HIREDATE, TRUNC(MONTHS_BETWEEN(SYSDATE,HIREDATE)/12, 0) AS WORKYEAR,
+            SAL, SAL*TRUNC(MONTHS_BETWEEN(SYSDATE, HIREDATE)/12,0) AS SUMSAL 
+FROM        EMP;
+--WHERE   
+?
+?-- 4.이름, 업무, 입사일, 입사한 요일을 출력
+SELECT      ENAME, JOB, HIREDATE, TO_CHAR(HIREDATE, 'DAY') AS HIRE_DAY
+FROM        EMP;
+-- WHERE   
+
+?-- 5. 업무별, 부서별 급여 합계와 인원수를 출력하되, 
+-- 10번 부서를 제외하고 업무가 ‘SALESMAN’과 ‘MANAGER’만 출력한다.
+-- JOB, DEPTNO가 그룹화 되어있어서 WHERE절과 HAVING절 바뀌어도 동일하게 나옴
+SELECT      JOB, DEPTNO, SUM(SAL) AS SUM, COUNT(*) AS NUM
+FROM        EMP
+WHERE       DEPTNO != 10 
+GROUP BY    JOB, DEPTNO
+HAVING      JOB IN('SALESMAN', 'MANAGER');
+
+
+-- 6.* 업무별로 평균급여와 최대급여를 출력하되, 평균급여가 2000이상인 것만 출력하고 평균급여가 높은 순으로 정렬
+SELECT      JOB, TRUNC(AVG(SAL)) AS AVG, MAX(SAL) AS MAX
+FROM        EMP
+--WHERE   
+GROUP BY    JOB
+HAVING      AVG(SAL) >= 2000
+ORDER BY    AVG(SAL) DESC;
+
+
+-- 7. 같은 입사년도 별로 인원수를 출력
+SELECT      TO_CHAR(HIREDATE, 'YYYY') AS HIRE_YEAR, COUNT(*) AS NUM
+FROM        EMP
+--WHERE   
+GROUP BY    TO_CHAR(HIREDATE, 'YYYY');
+
+-- 8.* 5개씩 급여합계와 인원수를 출력(rownum 이용)
+SELECT      CEIL(ROWNUM/5), SUM(SAL), COUNT(*) 
+FROM        EMP
+GROUP BY    CEIL(ROWNUM/5);
+
+
+-- 9. * 다음과 같이 출력
+SELECT      
+FROM
+WHERE;
+
+-- 10. 다음과 같이 업무별, 부서별 출력
+
+
+----------------------------JOIN -----------------------------
+-- 사원테이블(EMP)에 사원명과 부서테이블(DEPT)에 그 사원의 부서명을 출력
+SELECT      ENAME, DNAME
+FROM        EMP, DEPT;
+
+-- JOIN 패턴
+SELECT      EMP.ENAME, DEPT.DNAME, DEPT.DEPTNO
+FROM        EMP, DEPT
+WHERE       EMP.DEPTNO=DEPT.DEPTNO;
+-- JOIN 패턴 (별칭)
+SELECT      E.ENAME, D.DNAME, D.DEPTNO
+FROM        EMP E, DEPT D
+WHERE       E.DEPTNO=D.DEPTNO;
+
+
+-- INNNR JOIN
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E, DEPT D
+WHERE       E.DEPTNO=D.DEPTNO;
+-- INNER JOIN - 표준 (WHERE 써도 무방)
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E INNER JOIN DEPT D
+ON          E.DEPTNO=D.DEPTNO;
+
+
+-- OUTER JOIN (윤희선 NULL값도 출력)
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E, DEPT D
+WHERE       E.DEPTNO=D.DEPTNO(+);
+-- OUTER JOIN - 표준
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E LEFT OUTER JOIN DEPT D
+ON          E.DEPTNO=D.DEPTNO(+);
+
+
+-- EMP에 (+) 40번 부서에 사람은 없지만 출력
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E, DEPT D
+WHERE       E.DEPTNO(+) =D.DEPTNO;
+-- 표준
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E RIGHT OUTER JOIN DEPT D
+ON          E.DEPTNO(+) =D.DEPTNO;
+
+
+-- 양쪽에 (+) -> X
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E, DEPT D
+WHERE       E.DEPTNO(+) =D.DEPTNO(+);
+-- 양쪽에 (+) -> X
+SELECT      E.ENAME AS ENAME, D.DNAME AS DNAME, D.DEPTNO AS DEPTNO
+FROM        EMP E FULL OUTER JOIN DEPT D
+WHERE       E.DEPTNO(+) =D.DEPTNO(+);
+
+-- 사원테이블(EMP)에 각 사원의 매니저를 조회
+SELECT      E1.EMPNO, E1.ENAME, E1.MGR, E2.EMPNO, E2.ENAME
+FROM        EMP E1, EMP E2
+WHERE       E1.MGR=E2.EMPNO;
+-- 표준
+SELECT      E1.EMPNO E1EMPNO, E1.ENAME E1ENAME, E1.MGR E1MGR, E2.EMPNO E2EMPNO, E2.ENAME E2ENAME
+FROM        EMP E1 INNER JOIN EMP E2
+WHERE       E1.MGR=E2.EMPNO;
+-- OUTER JOIN으로 
+SELECT      E1.EMPNO E1EMPNO, E1.ENAME E1ENAME, E1.MGR E1MGR, E2.EMPNO E2EMPNO, E2.ENAME E2ENAME
+FROM        EMP E1 LEFT OUTER JOIN EMP E2
+WHERE       E1.MGR=E2.EMPNO(+);
+
+
+-- 집합
+SELECT empno, ename, job, deptno FROM emp WHERE job= 'CLERK'
+        -- SMITH / ADAMS / JAMES / MILLER
+        UNION ALL(전체), INTERSECT(교집합, JOIN X), MINUS
+SELECT empno, ename, job, deptno FROM emp WHERE deptno=10;
+        -- CLARK / KING / MILLER
+        
+        
+-------------------- JOIN 기초 문제 --------------------
+--1. EMP 테이블에서 사원번호, 이름, 업무, 부서번호와 DEPT 테이블에서 부서명, 근무지를 출력
+-- OUTER JOIN
+SELECT      E.EMPNO EMPNO, E.ENAME ENAME, E.JOB EJOB, E.DEPTNO EDEPTNO, D.DEPTNO DDEPTNO, D.LOC DLOC
+FROM        EMP E, DEPT D
+WHERE       E.DEPTNO = D.DEPTNO(+);
+-- OUTER JOIN(표준)
+SELECT      E.EMPNO EMPNO, E.ENAME ENAME, E.JOB EJOB, E.DEPTNO EDEPTNO, D.DEPTNO DDEPTNO, D.LOC DLOC
+FROM        EMP E LEFT OUTER JOIN DEPT D
+ON          E.DEPTNO = D.DEPTNO(+);
+
+
+--2. SALESMAN 사원만 사원번호, 이름, 급여, 부서명, 근무지를 출력?
+--
+SELECT      E.EMPNO EMPNO, E.ENAME ENAME, E.SAL ESAL, D.DNAME DNAME, D.LOC DLOC
+FROM        EMP E , DEPT D
+--ON          E.DEPTNO = D.DEPTNO
+WHERE       E.JOB = 'SALESMAN';
+-- 표준
+SELECT      E.EMPNO EMPNO, E.ENAME ENAME, E.SAL ESAL, D.DNAME DNAME, D.LOC DLOC
+FROM        EMP E LEFT OUTER JOIN DEPT D
+ON          E.DEPTNO = D.DEPTNO
+WHERE       E.JOB = 'SALESMAN';
+
+
+--3. 보너스(comm)를 받는 사원에 대해 이름, 부서명, 위치를 출력?
+--
+SELECT      E.ENAME, D.DNAME, D.LOC 
+FROM        EMP E LEFT OUTER JOIN DEPT D
+ON          E.DEPTNO = D.DEPTNO
+WHERE       E.COMM >= 0;
+
+--4. 부서별 부서명과 급여 합계를 출력
+SELECT      d.DNAME, SUM(SAL) AS SUMSAL
+FROM        emp E RIGHT OUTER JOIN DEPT D
+ON          E.DEPTNO = D.DEPTNO
+GROUP BY    D.DNAME;
+
+-- 5. 업무가 ‘MANAGER’인 사원의 정보를 이름, 업무, 부서명, 근무지를 출력 
+SELECT      E.ENAME, E.JOB, D.DNAME, D.LOC
+FROM        EMP E LEFT OUTER JOIN DEPT D
+ON          E.DEPTNO = D.DEPTNO
+WHERE       E.JOB = 'MANAGER';
+
+
+-------------------HR 계정-------------------
+-- 1. 이름의 성이 'King'사원의 사번과 부서명을 출력(employees, department)
+
+-- 2.  이름의 성이 'King'사원의 사번과 부서명 그리고 업무명을 출력(employees, department, jobs)
+SELECT      E.EMPLOYEES_ID ID, D.DEPARTMENT_NAME DNAME, J.JOB_TITLE JOBNAME
+FROM        EMPLOYEES E FULL OUTER JOIN DEPARTMENTS D
+                        ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+                        FULL OUTER JOIN JOBS J
+                        ON E.JOB_ID = J.JOB_ID
+WHERE       E.LAST_NAME LIKE 'KING';
+
+--3. 2007년 상반기에 입사한 사원들의 사번과 이름, 입사일 그리고 부서명을 출력
+--(*) Grant는 아직 부서가 배정받지 못한 상태이지만 Grant도 출력되려면
+
+
+--4. 'Executive' 부서에서 사원과 해당 사원의 매니저(상사) 이름을 출력
+--(*) 매니저(상사)가 없는 사원인 'King'이 출력되려면
+
+-------------------입사문제-------------------
+-- SQL-문제 1) 아래 스키마를 보고 평점이 3.0이상인 학생들의 이름을 보여주는 SQL
+SELECT      S.NAME
+FROM        ENROLL E FULL OUTER JOIN STUDENT S
+            ON  
+WHERE       E.HAKJUM>=3.0;
+
+
+-- SQL-문제-2) 다음 중 아래와 같은 테이블에서 Full Outer Join의 결과를 작성하시오       

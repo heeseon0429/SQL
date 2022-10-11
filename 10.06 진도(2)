@@ -1,0 +1,40 @@
+create table stat_salary ( 
+stat_date date not null, -- 날짜
+dept_no number, -- 부서
+emp_count number, -- 사원수
+tot_salary number, -- 급여총액
+avg_salary number ); -- 급여평균
+
+-- 날짜와 부서번호 입력
+SELECT sysdate, deptno FROM emp GROUP BY deptno;
+
+INSERT INTO stat_salary (stat_date, dept_no) 
+    SELECT sysdate, deptno FROM emp GROUP BY deptno;
+    
+SELECT * FROM stat_salary;
+
+--(3) 사원수, 급여총액, 평균급여 입력(?) -> 수정
+SELECT count(*), sum(sal), round(avg(sal)) FROM emp GROUP BY deptno;
+
+UPDATE stat_salary ss
+SET ( emp_count, tot_salary, avg_salary )
+        = (SELECT count(*), sum(sal), round(avg(sal)) 
+            FROM emp e
+            WHERE ss.dept_no = e.deptno
+            GROUP BY deptno);
+            
+CREATE TABLE emp_cp as SELECT * FROM emp;
+
+SELECT * FROM emp_cp;
+
+-- 부서명이 'SALES'인 사원의 정보 삭제 (emp_cp)
+--DELETE emp_cp ec WHERE  deptno = 30;
+DELETE FROM emp_cp e WHERE e.deptno=(SELECT d.deptno FROM dept d WHERE d.dname ='SALES'); 
+
+
+
+-------------------[ 과제 오라클 merge]-------------------------
+-- 사원테이블에 존재하는 사원이면 사원의 급여를 10% 인상하고, 
+-- 존재하지 않는 사원이면 사원테이블에 정보를 입력한다.
+
+

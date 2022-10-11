@@ -1,0 +1,57 @@
+-- HR 계정에서 ( employees 테이블 )
+
+--1. 2003년에 입사한 사원들의 사번, 이름, 입사일을 출력
+SELECT      EMPLOYEE_ID, FIRST_NAME || LAST_NAME AS FULL_NAME, HIRE_DATE
+FROM        EMPLOYEES
+WHERE       TO_CHAR(HIRE_DATE, 'YYYY') = 2003; 
+--GROUP BY
+--HAVING
+
+--2. 업무가 FI_ACCOUNT / FI_MGR / SA_MAN / SA_REP 인 사원들의 정보를 출력
+SELECT      *
+FROM        EMPLOYEES
+WHERE       JOB_ID IN('FI_ACCOUNT' , 'FI_MGR' ,'SA_MAN' , 'SA_REP' );
+--GROUP BY
+--HAVING      
+
+--WHERE lower(job_id) = 'fi_account' or lower(job_id) = 'ft_mgr'
+--or lower(job_id) = 'sa_man' or lower(job_id) = 'sa_rep';
+
+
+--3. 커미션을 받는 사원들의 명단을 출력??
+SELECT      *
+FROM        EMPLOYEES
+WHERE       COMMISSION_PCT IS NOT NULL;
+--GROUP BY    
+--HAVING
+
+--4.업무가 SA_MAN 또는 SA_REP이면 "판매부서"를 그 외는 "그 외 부서"라고 출력?
+SELECT      *
+FROM        EMPLOYEES
+WHERE       JOB IN('SA_MAN' OR 'SA_REP')
+GROUP BY
+HAVING      ;
+
+--5. 연도별로 입사자들의 최소급여, 최대 급여, 급여의 총합 그리고 평균 급여를 구하시오??
+SELECT      HIRE_DATE, MIN(SALARY), MAX(SALARY), SUM(SALARY), AVG(SALARY)
+FROM        EMPLOYEES
+--WHERE       
+GROUP BY    HIRE_DATE;
+--HAVING      
+
+--6. 부서별 평균 급여가 $10,000 이상인 부서만 구하시오. ( 평균급여가 높은 순으로 )?
+SELECT      DEPARTMENT_ID, ROUND(AVG(SALARY),0)
+FROM        EMPLOYEES
+--WHERE       
+GROUP BY    DEPARTMENT_ID
+HAVING      AVG(SALARY) >= 10000
+ORDER BY    AVG(SALARY) DESC;
+
+--7. 부서별 최대 급여를 구하시오
+SELECT      DEPARTMENT_ID, MAX(SALARY) 
+FROM        EMPLOYEES
+--WHERE       
+GROUP BY    DEPARTMENT_ID;
+--HAVING      
+
+

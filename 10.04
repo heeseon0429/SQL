@@ -1,0 +1,2 @@
+
+CREATE TABLE dept AS SELECT * FROM scott.dept

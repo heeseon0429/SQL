@@ -1,0 +1,77 @@
+CREATE OR REPLACE VIEW v_emp  AS
+           select empno, ename, deptno from emp;
+           
+SELECT * FROM v_emp;
+DESC v_emp;
+
+INSERT INTO v_emp VALUES(1000, '홍길동', 20);
+SELECT * FROM v_emp;
+SELECT * FROM emp;
+
+-- pk 조건에서 오류 (1000번 사번)
+INSERT INTO v_emp VALUES(1000, '홍홍이', 20);
+
+-- foreign key (X)
+INSERT INTO v_emp VALUES(2000, '홍홍이', 90);
+
+-- 읽기 전용
+CREATE OR REPLACE VIEW v_emp  AS
+           select empno, ename, deptno from emp
+           WITH READ ONLY;
+           
+-- 이미 WITH ONLY이기 때문에 오류 
+INSERT INTO v_emp VALUES(2000, '홍홍이', 30);
+
+-- [ 연습 ] EMP 테이블에서 30번 부서만 EMPNO를 EMP_NO로 ENAME을 NAME로 SAL를 SALARY로 바꿔서 
+--        EMP_30 뷰를 생성하시오.
+CREATE OR REPLACE VIEW v_emp_30  AS
+           select  empno emp_no, ename name, sal salary FROM emp WHERE deptno = 30
+           WITH READ ONLY;
+           
+SELECT * FROM v_emp_30;
+
+
+CREATE OR REPLACE VIEW v_emp_info  AS
+select  e.empno empno, e.ename ename, d.dname dname 
+from    emp e, dept d
+where   e.deptno=d.deptno;
+
+SELECT * FROM v_emp_info;
+--(x)
+INSERT INTO v_emp_info (empno, ename, dname) VALUES (3333, '맹꽁이', 30);
+INSERT INTO v_emp_info (empno, ename) VALUES (3333, '맹꽁이');
+
+-- 뷰는 읽기 전용으로 만들어줘야 함
+DELETE FROM v_emp_info WHERE empno = 7788;
+SELECT * FROM v_emp_info;
+
+-- [ 연습 ] 부서별로 부서명, 최소급여, 최대 급여, 부서의 평균 급여를 
+--         포함하는 V_DEPT_SUM 뷰를 생성하여라.
+-- 별칭 부여!!!
+CREATE OR REPLACE VIEW v_dept_sum  AS
+           select d.dname, min(sal) min, max(sal) max, avg(sal) avg FROM emp e, dept d
+           WHERE e.deptno = d.deptno
+           GROUP BY d.dname
+           WITH READ ONLY;
+SELECT * FROM v_dept_sum;
+
+INSERT INTO emp (empno, ename, sal, deptno)
+VALUES(444, '호이', 9900, 20);
+SELECT * FROM emp;
+
+CREATE  SEQUENCE seq_temp;
+SELECT seq_temp.NEXTVAL FROM DUAL;
+
+-- 현재값( nextval을 해줘야지 currval을 볼 수 있음)
+CREATE  SEQUENCE seq_temp;
+SELECT seq_temp.currVAL FROM DUAL;
+
+-- 5000번부터 10씩 증가하는 자동증가수 (시퀀스)
+CREATE SEQUENCE seq_temp3
+  start with 5000 increment by 10;
+
+INSERT INTO emp(empno, ename) VAlUES (seq_temp3.NEXTVAL, '박씨');
+ 
+SELECT empno, ename, job, rowid from emp;
+
+------------eclip----------

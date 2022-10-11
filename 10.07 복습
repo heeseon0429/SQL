@@ -1,0 +1,17 @@
+-----------복습 문제----------
+-- 11. scott 또는 ward와 월급이 같은 사원의 정보를 이름, 업무, 급여를 출력
+SELECT  ename, job, sal
+FROM    emp 
+WHERE   sal in (SELECT sal FROM emp WHERE ename in('scott', 'ward'));
+
+-- 12. chicago에서 근무하는 사원과 같은 업무를 하는 사원의 이름, 업무를 출력
+SELECT  ename, job
+FROM    emp
+WHERE   job in ( SELECT e.job FROM emp e inner join dept d ON e.deptno = d.deptno
+                    WHERE LOWER(d.loc) = 'chicago' );
+
+-- 13. 부서별로 월급이 평균 월급보다 높은 사원을 부서번호, 이름, 급여를 출력
+SELECT      e.deptno, e.ename, e.sal
+FROM        emp e ,(SElECT deptno, trunc(avg(sal)) avg FROM emp  GROUP BY deptno ) e1
+WHERE       e.deptno = e1.deptno
+AND         e.sal > e1.avg;
